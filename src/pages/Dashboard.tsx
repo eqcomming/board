@@ -6,6 +6,8 @@ import AddVehicleForm from "@/components/AddVehicleForm";
 import {
   VEHICLE_TYPE_LABELS,
   STATUS_LABELS,
+  STATUS_COLORS,
+  STATUS_ORDER,
   DESTINATION_LABELS,
   type Vehicle,
   type VehicleStatus,
@@ -60,16 +62,23 @@ export default function Dashboard() {
     const needle = q.toLowerCase();
     return (
       v.plate.toLowerCase().includes(needle) ||
-      v.reason.toLowerCase().includes(needle)
+      v.reason.toLowerCase().includes(needle) ||
+      v.driver.toLowerCase().includes(needle)
     );
   });
 
-  async function toggleStatus(v: Vehicle) {
-    const newStatus: VehicleStatus = v.status === "ARRIVED" ? "READY" : "ARRIVED";
+  async function changeStatus(v: Vehicle, newStatus: VehicleStatus) {
+    if (newStatus === v.status) return;
+    const readyAt = newStatus === "READY" ? new Date().toISOString() : null;
     setVehicles((prev) =>
-      prev.map((x) => (x.id === v.id ? { ...x, status: newStatus } : x))
+      prev.map((x) =>
+        x.id === v.id ? { ...x, status: newStatus, ready_at: readyAt } : x
+      )
     );
-    await supabase.from("vehicles").update({ status: newStatus }).eq("id", v.id);
+    await supabase
+      .from("vehicles")
+      .update({ status: newStatus, ready_at: readyAt })
+      .eq("id", v.id);
   }
 
   async function handleDelete(id: string) {
@@ -97,7 +106,7 @@ export default function Dashboard() {
           <input
             value={q}
             onChange={(e) => setQ(e.target.value)}
-            placeholder="Search (plate, reason)..."
+            placeholder="Search (plate, driver, reason)..."
             className="flex-1 min-w-[200px] rounded-lg border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500"
           />
           <select
@@ -106,8 +115,11 @@ export default function Dashboard() {
             className="rounded-lg border border-slate-300 px-3 py-2 text-sm"
           >
             <option value="">All statuses</option>
-            <option value="ARRIVED">Arrived</option>
-            <option value="READY">Ready</option>
+            {STATUS_ORDER.map((s) => (
+              <option key={s} value={s}>
+                {STATUS_LABELS[s]}
+              </option>
+            ))}
           </select>
         </div>
 
@@ -157,25 +169,29 @@ export default function Dashboard() {
                         {DESTINATION_LABELS[v.destination]}
                       </td>
                       <td className="px-4 py-3">
-                        <span
-                          className={`text-xs font-medium rounded-full px-2.5 py-1 ${
-                            v.status === "ARRIVED"
-                              ? "bg-amber-100 text-amber-700"
-                              : "bg-green-100 text-green-700"
-                          }`}
-                        >
-                          {STATUS_LABELS[v.status]}
-                        </span>
+                        {canChangeStatus ? (
+                          <select
+                            value={v.status}
+                            onChange={(e) =>
+                              changeStatus(v, e.target.value as VehicleStatus)
+                            }
+                            className={`text-xs font-medium rounded-full px-2.5 py-1 border-0 cursor-pointer ${STATUS_COLORS[v.status].badge}`}
+                          >
+                            {STATUS_ORDER.map((s) => (
+                              <option key={s} value={s}>
+                                {STATUS_LABELS[s]}
+                              </option>
+                            ))}
+                          </select>
+                        ) : (
+                          <span
+                            className={`text-xs font-medium rounded-full px-2.5 py-1 ${STATUS_COLORS[v.status].badge}`}
+                          >
+                            {STATUS_LABELS[v.status]}
+                          </span>
+                        )}
                       </td>
                       <td className="px-4 py-3 text-right whitespace-nowrap">
-                        {canChangeStatus && (
-                          <button
-                            onClick={() => toggleStatus(v)}
-                            className="text-brand-600 hover:underline text-xs font-medium mr-3"
-                          >
-                            Mark as {v.status === "ARRIVED" ? "Ready" : "Arrived"}
-                          </button>
-                        )}
                         {canDelete && (
                           <button
                             onClick={() => handleDelete(v.id)}

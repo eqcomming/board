@@ -40,7 +40,7 @@ export default function AddVehicleForm({ onAdded }: { onAdded: () => void }) {
       reason: reason.trim(),
       comment: comment.trim() || null,
       destination,
-      status: "ARRIVED",
+      status: "ARRIVING",
       created_by: session?.user.id,
     });
     setSaving(false);

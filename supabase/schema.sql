@@ -84,7 +84,8 @@ create table if not exists public.vehicles (
   reason text not null,
   comment text,
   destination text not null default 'SOHO' check (destination in ('SOHO','MEPA')),
-  status text not null default 'ARRIVED' check (status in ('ARRIVED','READY')),
+  status text not null default 'ARRIVING' check (status in ('ARRIVING','ARRIVED','READY')),
+  ready_at timestamptz,
   created_by uuid references public.profiles(id),
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()

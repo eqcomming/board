@@ -1,51 +1,55 @@
 import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/lib/supabase";
-import { VEHICLE_TYPE_LABELS, DESTINATION_LABELS, type Vehicle } from "@/lib/types";
+import {
+  VEHICLE_TYPE_LABELS,
+  DESTINATION_LABELS,
+  STATUS_LABELS,
+  STATUS_COLORS,
+  STATUS_ORDER,
+  type Vehicle,
+} from "@/lib/types";
 
-function Column({
-  title,
-  color,
-  vehicles,
-}: {
-  title: string;
-  color: string;
-  vehicles: Vehicle[];
-}) {
+function isToday(isoString: string) {
+  const d = new Date(isoString);
+  const now = new Date();
   return (
-    <div className="flex-1 flex flex-col min-w-0">
-      <div className={`rounded-t-2xl px-6 py-4 ${color}`}>
-        <h2 className="text-3xl font-bold text-white tracking-wide">
-          {title}
-        </h2>
+    d.getFullYear() === now.getFullYear() &&
+    d.getMonth() === now.getMonth() &&
+    d.getDate() === now.getDate()
+  );
+}
+
+function Row({ v }: { v: Vehicle }) {
+  const colors = STATUS_COLORS[v.status];
+  return (
+    <div className="flex items-center gap-4 bg-slate-800 rounded-xl px-5 py-4">
+      <span
+        className={`shrink-0 w-4 h-4 rounded-full ${colors.dot}`}
+        aria-hidden
+      />
+      <div className="flex-1 min-w-0">
+        <div className="flex items-baseline gap-3 flex-wrap">
+          <span className="text-2xl font-bold text-white tracking-wide">
+            {v.plate}
+          </span>
+          <span className="text-slate-400 text-lg">
+            {VEHICLE_TYPE_LABELS[v.vehicle_type]} · Driver: {v.driver}
+          </span>
+        </div>
+        <div className="text-slate-400 text-lg">
+          {v.reason} · {DESTINATION_LABELS[v.destination]}
+        </div>
       </div>
-      <div className="flex-1 bg-slate-900/40 rounded-b-2xl p-4 space-y-3 overflow-y-auto">
-        {vehicles.length === 0 && (
-          <p className="text-slate-500 text-xl text-center py-10">— no vehicles —</p>
-        )}
-        {vehicles.map((v) => (
-          <div
-            key={v.id}
-            className="bg-slate-800 rounded-xl px-5 py-4 flex items-center justify-between"
-          >
-            <div>
-              <div className="text-2xl font-bold text-white tracking-wide">
-                {v.plate}
-              </div>
-              <div className="text-slate-400 text-lg">
-                {VEHICLE_TYPE_LABELS[v.vehicle_type]} · Driver: {v.driver} · {v.reason}
-              </div>
-              <div className="text-slate-400 text-lg">
-                {DESTINATION_LABELS[v.destination]}
-              </div>
-            </div>
-            <div className="text-slate-400 text-lg tabular-nums text-right">
-              {v.eta && <div>ETA {v.eta}</div>}
-              <div>
-                {new Date(v.arrival_date).toLocaleDateString("en-US")}
-              </div>
-            </div>
-          </div>
-        ))}
+      <div className="text-right shrink-0">
+        <span
+          className={`inline-block text-sm font-semibold rounded-full px-3 py-1 ${colors.badge}`}
+        >
+          {STATUS_LABELS[v.status]}
+        </span>
+        <div className="text-slate-400 text-base tabular-nums mt-1">
+          {v.eta && <span>ETA {v.eta} · </span>}
+          {new Date(v.arrival_date).toLocaleDateString("en-US")}
+        </div>
       </div>
     </div>
   );
@@ -86,8 +90,15 @@ export default function Board() {
     };
   }, [load]);
 
-  const arrived = vehicles.filter((v) => v.status === "ARRIVED");
-  const ready = vehicles.filter((v) => v.status === "READY");
+  // Ready vehicles drop off the live board once the day changes - they stay
+  // in the database (and on the Dashboard) as history, just not shown here.
+  const visible = vehicles
+    .filter((v) => v.status !== "READY" || (v.ready_at && isToday(v.ready_at)))
+    .sort((a, b) => {
+      const order = STATUS_ORDER.indexOf(a.status) - STATUS_ORDER.indexOf(b.status);
+      if (order !== 0) return order;
+      return a.created_at.localeCompare(b.created_at);
+    });
 
   return (
     <div className="min-h-screen bg-slate-950 flex flex-col p-6">
@@ -97,9 +108,16 @@ export default function Board() {
           {now.toLocaleTimeString("en-US")}
         </div>
       </div>
-      <div className="flex-1 flex gap-6 min-h-0">
-        <Column title="ARRIVED" color="bg-amber-600" vehicles={arrived} />
-        <Column title="READY" color="bg-green-600" vehicles={ready} />
+
+      <div className="flex-1 space-y-3 overflow-y-auto">
+        {visible.length === 0 && (
+          <p className="text-slate-500 text-xl text-center py-10">
+            — no vehicles —
+          </p>
+        )}
+        {visible.map((v) => (
+          <Row key={v.id} v={v} />
+        ))}
       </div>
     </div>
   );
