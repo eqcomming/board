@@ -44,7 +44,7 @@ export default function AdminUsers() {
     });
     const data = await res.json().catch(() => ({}));
     if (!res.ok) {
-      throw new Error(data.error || "Greška");
+      throw new Error(data.error || "Error");
     }
     return data;
   }
@@ -58,7 +58,7 @@ export default function AdminUsers() {
       setForm(emptyForm);
       await load();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Greška prilikom čuvanja");
+      setError(err instanceof Error ? err.message : "Error saving user");
     } finally {
       setSaving(false);
     }
@@ -70,12 +70,12 @@ export default function AdminUsers() {
   }
 
   async function handleDelete(id: string) {
-    if (!confirm("Da li sigurno želiš da obrišeš ovaj nalog?")) return;
+    if (!confirm("Are you sure you want to delete this account?")) return;
     try {
       await callFunction("DELETE", { user_id: id });
       setUsers((prev) => prev.filter((u) => u.id !== id));
     } catch (err) {
-      alert(err instanceof Error ? err.message : "Greška pri brisanju");
+      alert(err instanceof Error ? err.message : "Error deleting account");
     }
   }
 
@@ -83,15 +83,15 @@ export default function AdminUsers() {
     <div className="min-h-screen bg-slate-50">
       <Nav />
       <main className="max-w-4xl mx-auto px-4 sm:px-6 py-6">
-        <h1 className="text-lg font-semibold text-slate-900 mb-1">Korisnici</h1>
+        <h1 className="text-lg font-semibold text-slate-900 mb-1">Users</h1>
         <p className="text-sm text-slate-500 mb-6">
-          Dodaj Maintenance i Fleet naloge koji mogu da pristupe aplikaciji.
+          Add Maintenance and Fleet accounts that can access the app.
         </p>
 
         <div className="space-y-8">
           <div className="bg-white border border-slate-200 rounded-xl p-5">
             <h2 className="text-sm font-semibold text-slate-900 mb-4">
-              Dodaj novi nalog
+              Add new account
             </h2>
             <form
               onSubmit={handleCreate}
@@ -99,7 +99,7 @@ export default function AdminUsers() {
             >
               <input
                 required
-                placeholder="Ime i prezime"
+                placeholder="Full name"
                 value={form.full_name}
                 onChange={(e) =>
                   setForm((f) => ({ ...f, full_name: e.target.value }))
@@ -117,7 +117,7 @@ export default function AdminUsers() {
               <input
                 required
                 type="password"
-                placeholder="Lozinka (min. 6 karaktera)"
+                placeholder="Password (min. 6 characters)"
                 value={form.password}
                 onChange={(e) =>
                   setForm((f) => ({ ...f, password: e.target.value }))
@@ -150,7 +150,7 @@ export default function AdminUsers() {
                   disabled={saving}
                   className="bg-brand-600 hover:bg-brand-700 disabled:opacity-60 text-white text-sm font-medium rounded-lg px-5 py-2.5"
                 >
-                  {saving ? "Čuvanje..." : "Dodaj korisnika"}
+                  {saving ? "Saving..." : "Add user"}
                 </button>
               </div>
             </form>
@@ -160,8 +160,8 @@ export default function AdminUsers() {
             <table className="w-full text-sm">
               <thead className="bg-slate-50 text-slate-500 text-left">
                 <tr>
-                  <th className="px-4 py-3 font-medium">Ime</th>
-                  <th className="px-4 py-3 font-medium">Uloga</th>
+                  <th className="px-4 py-3 font-medium">Name</th>
+                  <th className="px-4 py-3 font-medium">Role</th>
                   <th className="px-4 py-3 font-medium"></th>
                 </tr>
               </thead>
@@ -169,14 +169,14 @@ export default function AdminUsers() {
                 {loading ? (
                   <tr>
                     <td colSpan={3} className="px-4 py-6 text-center text-slate-500">
-                      Učitavanje...
+                      Loading...
                     </td>
                   </tr>
                 ) : (
                   users.map((u) => (
                     <tr key={u.id} className="hover:bg-slate-50">
                       <td className="px-4 py-3 font-medium text-slate-900">
-                        {u.full_name} {u.id === myProfile?.id && "(ti)"}
+                        {u.full_name} {u.id === myProfile?.id && "(you)"}
                       </td>
                       <td className="px-4 py-3">
                         <select
@@ -200,7 +200,7 @@ export default function AdminUsers() {
                             onClick={() => handleDelete(u.id)}
                             className="text-red-500 hover:underline text-xs font-medium"
                           >
-                            Obriši
+                            Delete
                           </button>
                         )}
                       </td>

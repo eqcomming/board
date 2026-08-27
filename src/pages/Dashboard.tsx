@@ -6,6 +6,7 @@ import AddVehicleForm from "@/components/AddVehicleForm";
 import {
   VEHICLE_TYPE_LABELS,
   STATUS_LABELS,
+  DESTINATION_LABELS,
   type Vehicle,
   type VehicleStatus,
 } from "@/lib/types";
@@ -72,7 +73,7 @@ export default function Dashboard() {
   }
 
   async function handleDelete(id: string) {
-    if (!confirm("Da li sigurno želiš da obrišeš ovo vozilo?")) return;
+    if (!confirm("Are you sure you want to delete this vehicle?")) return;
     const { error } = await supabase.from("vehicles").delete().eq("id", id);
     if (!error) {
       setVehicles((prev) => prev.filter((v) => v.id !== id));
@@ -87,7 +88,7 @@ export default function Dashboard() {
       <main className="max-w-6xl mx-auto px-4 sm:px-6 py-6">
         <div className="flex items-center justify-between mb-4">
           <h1 className="text-lg font-semibold text-slate-900">
-            Vozila u radionici
+            Vehicles in the shop
           </h1>
           {canAdd && <AddVehicleForm onAdded={load} />}
         </div>
@@ -96,7 +97,7 @@ export default function Dashboard() {
           <input
             value={q}
             onChange={(e) => setQ(e.target.value)}
-            placeholder="Pretraga (registracija, razlog)..."
+            placeholder="Search (plate, reason)..."
             className="flex-1 min-w-[200px] rounded-lg border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500"
           />
           <select
@@ -104,17 +105,17 @@ export default function Dashboard() {
             onChange={(e) => setStatusFilter(e.target.value as "" | VehicleStatus)}
             className="rounded-lg border border-slate-300 px-3 py-2 text-sm"
           >
-            <option value="">Svi statusi</option>
+            <option value="">All statuses</option>
             <option value="ARRIVED">Arrived</option>
             <option value="READY">Ready</option>
           </select>
         </div>
 
         {loading ? (
-          <p className="text-sm text-slate-500 py-8 text-center">Učitavanje...</p>
+          <p className="text-sm text-slate-500 py-8 text-center">Loading...</p>
         ) : filtered.length === 0 ? (
           <p className="text-sm text-slate-500 py-8 text-center">
-            Nema vozila koja odgovaraju pretrazi.
+            No vehicles match your search.
           </p>
         ) : (
           <div className="bg-white border border-slate-200 rounded-xl overflow-hidden">
@@ -122,10 +123,14 @@ export default function Dashboard() {
               <table className="w-full text-sm">
                 <thead className="bg-slate-50 text-slate-500 text-left">
                   <tr>
-                    <th className="px-4 py-3 font-medium">Registracija</th>
-                    <th className="px-4 py-3 font-medium">Tip</th>
-                    <th className="px-4 py-3 font-medium">Razlog dolaska</th>
-                    <th className="px-4 py-3 font-medium">Prijem</th>
+                    <th className="px-4 py-3 font-medium">Plate</th>
+                    <th className="px-4 py-3 font-medium">Type</th>
+                    <th className="px-4 py-3 font-medium">Driver</th>
+                    <th className="px-4 py-3 font-medium">Date</th>
+                    <th className="px-4 py-3 font-medium">ETA</th>
+                    <th className="px-4 py-3 font-medium">Problem</th>
+                    <th className="px-4 py-3 font-medium">Comment</th>
+                    <th className="px-4 py-3 font-medium">Destination</th>
                     <th className="px-4 py-3 font-medium">Status</th>
                     <th className="px-4 py-3 font-medium"></th>
                   </tr>
@@ -139,9 +144,17 @@ export default function Dashboard() {
                       <td className="px-4 py-3 text-slate-600">
                         {VEHICLE_TYPE_LABELS[v.vehicle_type]}
                       </td>
-                      <td className="px-4 py-3 text-slate-600">{v.reason}</td>
+                      <td className="px-4 py-3 text-slate-600">{v.driver}</td>
                       <td className="px-4 py-3 text-slate-600">
-                        {new Date(v.created_at).toLocaleString("sr-RS")}
+                        {new Date(v.arrival_date).toLocaleDateString("en-US")}
+                      </td>
+                      <td className="px-4 py-3 text-slate-600">{v.eta || "—"}</td>
+                      <td className="px-4 py-3 text-slate-600">{v.reason}</td>
+                      <td className="px-4 py-3 text-slate-600 max-w-[200px] truncate" title={v.comment || ""}>
+                        {v.comment || "—"}
+                      </td>
+                      <td className="px-4 py-3 text-slate-600">
+                        {DESTINATION_LABELS[v.destination]}
                       </td>
                       <td className="px-4 py-3">
                         <span
@@ -160,7 +173,7 @@ export default function Dashboard() {
                             onClick={() => toggleStatus(v)}
                             className="text-brand-600 hover:underline text-xs font-medium mr-3"
                           >
-                            Označi kao {v.status === "ARRIVED" ? "Ready" : "Arrived"}
+                            Mark as {v.status === "ARRIVED" ? "Ready" : "Arrived"}
                           </button>
                         )}
                         {canDelete && (
@@ -168,7 +181,7 @@ export default function Dashboard() {
                             onClick={() => handleDelete(v.id)}
                             className="text-red-500 hover:underline text-xs font-medium"
                           >
-                            Obriši
+                            Delete
                           </button>
                         )}
                       </td>

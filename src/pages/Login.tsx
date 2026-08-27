@@ -22,7 +22,7 @@ export default function Login() {
     setLoading(false);
 
     if (signInError) {
-      setError("Pogrešan email ili lozinka.");
+      setError("Incorrect email or password.");
       return;
     }
 
@@ -33,7 +33,7 @@ export default function Login() {
     <div className="min-h-screen flex items-center justify-center bg-slate-50 px-4">
       <div className="w-full max-w-sm bg-white rounded-xl shadow-sm border border-slate-200 p-8">
         <h1 className="text-xl font-semibold text-slate-900 mb-1">Equipment Coming</h1>
-        <p className="text-sm text-slate-500 mb-6">Prijavi se da nastaviš rad</p>
+        <p className="text-sm text-slate-500 mb-6">Sign in to continue</p>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
@@ -51,7 +51,7 @@ export default function Login() {
           </div>
           <div>
             <label className="block text-sm font-medium text-slate-700 mb-1">
-              Lozinka
+              Password
             </label>
             <input
               type="password"
@@ -74,12 +74,12 @@ export default function Login() {
             disabled={loading}
             className="w-full bg-brand-600 hover:bg-brand-700 disabled:opacity-60 text-white text-sm font-medium rounded-lg py-2.5 transition-colors"
           >
-            {loading ? "Prijavljivanje..." : "Prijavi se"}
+            {loading ? "Signing in..." : "Sign in"}
           </button>
         </form>
 
         <p className="text-xs text-slate-400 mt-6 text-center">
-          Tabla za TV (bez prijave):{" "}
+          TV board (no login needed):{" "}
           <a href="/board" className="text-brand-600 hover:underline">
             /board
           </a>

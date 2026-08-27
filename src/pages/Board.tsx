@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/lib/supabase";
-import { VEHICLE_TYPE_LABELS, type Vehicle } from "@/lib/types";
+import { VEHICLE_TYPE_LABELS, DESTINATION_LABELS, type Vehicle } from "@/lib/types";
 
 function Column({
   title,
@@ -20,7 +20,7 @@ function Column({
       </div>
       <div className="flex-1 bg-slate-900/40 rounded-b-2xl p-4 space-y-3 overflow-y-auto">
         {vehicles.length === 0 && (
-          <p className="text-slate-500 text-xl text-center py-10">— nema vozila —</p>
+          <p className="text-slate-500 text-xl text-center py-10">— no vehicles —</p>
         )}
         {vehicles.map((v) => (
           <div
@@ -32,14 +32,17 @@ function Column({
                 {v.plate}
               </div>
               <div className="text-slate-400 text-lg">
-                {VEHICLE_TYPE_LABELS[v.vehicle_type]} · {v.reason}
+                {VEHICLE_TYPE_LABELS[v.vehicle_type]} · Driver: {v.driver} · {v.reason}
+              </div>
+              <div className="text-slate-400 text-lg">
+                {DESTINATION_LABELS[v.destination]}
               </div>
             </div>
-            <div className="text-slate-400 text-lg tabular-nums">
-              {new Date(v.created_at).toLocaleTimeString("sr-RS", {
-                hour: "2-digit",
-                minute: "2-digit",
-              })}
+            <div className="text-slate-400 text-lg tabular-nums text-right">
+              {v.eta && <div>ETA {v.eta}</div>}
+              <div>
+                {new Date(v.arrival_date).toLocaleDateString("en-US")}
+              </div>
             </div>
           </div>
         ))}
@@ -72,7 +75,7 @@ export default function Board() {
       )
       .subscribe();
 
-    // Rezervna mreža za slučaj da realtime konekcija ispadne (npr. TV ostavljen preko noći)
+    // Backup refresh in case the realtime connection drops (e.g. TV left on overnight)
     const poll = setInterval(load, 30000);
     const clock = setInterval(() => setNow(new Date()), 1000);
 
@@ -91,7 +94,7 @@ export default function Board() {
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-4xl font-bold text-white">Equipment Coming</h1>
         <div className="text-2xl text-slate-400 tabular-nums">
-          {now.toLocaleTimeString("sr-RS")}
+          {now.toLocaleTimeString("en-US")}
         </div>
       </div>
       <div className="flex-1 flex gap-6 min-h-0">

@@ -19,14 +19,14 @@ export default function Nav() {
         <div className="flex items-center gap-2">
           <span className="font-semibold text-slate-900 mr-4">Equipment Coming</span>
           <Link to="/dashboard" className={linkClass("/dashboard")}>
-            Vozila
+            Vehicles
           </Link>
           <Link to="/board" className={linkClass("/board")} target="_blank">
-            TV Tabla
+            TV Board
           </Link>
           {profile?.role === "ADMIN" && (
             <Link to="/admin/users" className={linkClass("/admin/users")}>
-              Korisnici
+              Users
             </Link>
           )}
         </div>
@@ -39,7 +39,7 @@ export default function Nav() {
             onClick={() => signOut()}
             className="text-sm text-slate-500 hover:text-slate-800 border border-slate-200 rounded-lg px-3 py-1.5"
           >
-            Odjava
+            Log out
           </button>
         </div>
       </div>
