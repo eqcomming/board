@@ -1,7 +1,6 @@
 import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/lib/supabase";
 import {
-  VEHICLE_TYPE_LABELS,
   DESTINATION_LABELS,
   STATUS_LABELS,
   STATUS_COLORS,
@@ -33,7 +32,7 @@ function Row({ v }: { v: Vehicle }) {
             {v.plate}
           </span>
           <span className="text-slate-400 text-lg">
-            {VEHICLE_TYPE_LABELS[v.vehicle_type]} · Driver: {v.driver}
+            Driver: {v.driver}
           </span>
         </div>
         <div className="text-slate-400 text-lg">

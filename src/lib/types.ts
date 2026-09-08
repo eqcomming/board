@@ -1,7 +1,5 @@
 export type Role = "ADMIN" | "MAINTENANCE" | "FLEET";
 
-export type VehicleType = "TRUCK" | "TRAILER";
-
 export type VehicleStatus = "ARRIVING" | "ARRIVED" | "READY";
 
 export type Destination = "SOHO" | "MEPA";
@@ -15,7 +13,6 @@ export interface Profile {
 
 export interface Vehicle {
   id: string;
-  vehicle_type: VehicleType;
   plate: string;
   driver: string;
   arrival_date: string;
@@ -34,11 +31,6 @@ export const ROLE_LABELS: Record<Role, string> = {
   ADMIN: "Administrator",
   MAINTENANCE: "Maintenance",
   FLEET: "Fleet",
-};
-
-export const VEHICLE_TYPE_LABELS: Record<VehicleType, string> = {
-  TRUCK: "Truck",
-  TRAILER: "Trailer",
 };
 
 // Order matters - used to sort the board and to know what "next status" is.

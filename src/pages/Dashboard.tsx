@@ -4,7 +4,6 @@ import { useAuth } from "@/contexts/AuthContext";
 import Nav from "@/components/Nav";
 import AddVehicleForm from "@/components/AddVehicleForm";
 import {
-  VEHICLE_TYPE_LABELS,
   STATUS_LABELS,
   STATUS_COLORS,
   STATUS_ORDER,
@@ -135,8 +134,7 @@ export default function Dashboard() {
               <table className="w-full text-sm">
                 <thead className="bg-slate-50 text-slate-500 text-left">
                   <tr>
-                    <th className="px-4 py-3 font-medium">Plate</th>
-                    <th className="px-4 py-3 font-medium">Type</th>
+                    <th className="px-4 py-3 font-medium">Truck and Trailer</th>
                     <th className="px-4 py-3 font-medium">Driver</th>
                     <th className="px-4 py-3 font-medium">Date</th>
                     <th className="px-4 py-3 font-medium">ETA</th>
@@ -152,9 +150,6 @@ export default function Dashboard() {
                     <tr key={v.id} className="hover:bg-slate-50">
                       <td className="px-4 py-3 font-medium text-slate-900">
                         {v.plate}
-                      </td>
-                      <td className="px-4 py-3 text-slate-600">
-                        {VEHICLE_TYPE_LABELS[v.vehicle_type]}
                       </td>
                       <td className="px-4 py-3 text-slate-600">{v.driver}</td>
                       <td className="px-4 py-3 text-slate-600">

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/contexts/AuthContext";
-import type { VehicleType, Destination } from "@/lib/types";
+import type { Destination } from "@/lib/types";
 
 function todayISO() {
   return new Date().toISOString().slice(0, 10);
@@ -10,7 +10,6 @@ function todayISO() {
 export default function AddVehicleForm({ onAdded }: { onAdded: () => void }) {
   const { session } = useAuth();
   const [open, setOpen] = useState(false);
-  const [vehicleType, setVehicleType] = useState<VehicleType>("TRUCK");
   const [plate, setPlate] = useState("");
   const [driver, setDriver] = useState("");
   const [arrivalDate, setArrivalDate] = useState(todayISO());
@@ -26,13 +25,12 @@ export default function AddVehicleForm({ onAdded }: { onAdded: () => void }) {
     setError(null);
 
     if (!plate.trim() || !driver.trim() || !arrivalDate || !reason.trim()) {
-      setError("Plate, driver, date and problem are required.");
+      setError("Truck and trailer, driver, date and problem are required.");
       return;
     }
 
     setSaving(true);
     const { error: insertError } = await supabase.from("vehicles").insert({
-      vehicle_type: vehicleType,
       plate: plate.trim().toUpperCase(),
       driver: driver.trim(),
       arrival_date: arrivalDate,
@@ -56,7 +54,6 @@ export default function AddVehicleForm({ onAdded }: { onAdded: () => void }) {
     setEta("");
     setReason("");
     setComment("");
-    setVehicleType("TRUCK");
     setDestination("SOHO");
     setOpen(false);
     onAdded();
@@ -83,27 +80,14 @@ export default function AddVehicleForm({ onAdded }: { onAdded: () => void }) {
       <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
         <div>
           <label className="block text-xs font-medium text-slate-600 mb-1">
-            Type *
-          </label>
-          <select
-            value={vehicleType}
-            onChange={(e) => setVehicleType(e.target.value as VehicleType)}
-            className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
-          >
-            <option value="TRUCK">Truck</option>
-            <option value="TRAILER">Trailer</option>
-          </select>
-        </div>
-        <div>
-          <label className="block text-xs font-medium text-slate-600 mb-1">
-            Plate number *
+            Truck and Trailer *
           </label>
           <input
             required
             value={plate}
             onChange={(e) => setPlate(e.target.value)}
             className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
-            placeholder="e.g. BG-123-AB"
+            placeholder="e.g. 1234/567890"
           />
         </div>
         <div>

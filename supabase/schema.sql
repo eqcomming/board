@@ -76,7 +76,6 @@ create trigger on_auth_user_created
 -- ------------------------------------------------------------
 create table if not exists public.vehicles (
   id uuid primary key default gen_random_uuid(),
-  vehicle_type text not null check (vehicle_type in ('TRUCK','TRAILER')),
   plate text not null,
   driver text not null default '',
   arrival_date date not null default current_date,
